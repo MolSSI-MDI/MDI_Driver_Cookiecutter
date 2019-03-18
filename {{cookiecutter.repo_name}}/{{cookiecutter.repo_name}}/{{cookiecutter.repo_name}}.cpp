@@ -1,5 +1,6 @@
 #include <iostream>
 #include <mpi.h>
+#include <string.h>
 extern "C" {
 #include "mdi.h"
 }
