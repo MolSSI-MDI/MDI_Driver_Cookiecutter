@@ -13,18 +13,35 @@ int main(int argc, char **argv) {
   MPI_Comm world_comm;
   MPI_Init(&argc, &argv);
 
-  // Ensure the mdi argument has been provided 
-  // NOTE: Assumes that -mdi is the first option provided
+  // Read through all the command line options
   int iarg = 1;
-  if ( !( argc-iarg >= 2 && strcmp(argv[iarg],"-mdi") == 0) ) {
-    throw string("The -mdi argument was not provided.");
-  }
+  bool initialized_mdi = false;
+  while ( iarg < argc ) {
 
-  // Initialize the MDI library
-  world_comm = MPI_COMM_WORLD;
-  int ret = MDI_Init(argv[iarg+1], &world_comm);
-  if ( ret != 0 ) {
-    throw string("The MDI library was not initialized correctly.");
+    if ( strcmp(argv[iarg],"-mdi") == 0 ) {
+
+      // Ensure that the argument to the -mdi option was provided
+      if ( argc-iarg < 2 ) {
+	throw string("The -mdi argument was not provided.");
+      }
+
+      // Initialize the MDI Library
+      world_comm = MPI_COMM_WORLD;
+      int ret = MDI_Init(argv[iarg+1], &world_comm);
+      if ( ret != 0 ) {
+	throw string("The MDI library was not initialized correctly.");
+      }
+      initialized_mdi = true;
+      iarg += 2;
+
+    }
+    else {
+      throw string("Unrecognized option.");
+    }
+
+  }
+  if ( not initialized_mdi ) {
+    throw string("The -mdi command line option was not provided.");
   }
 
   // Connect to the engines
