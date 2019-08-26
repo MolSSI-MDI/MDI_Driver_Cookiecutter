@@ -2,9 +2,7 @@
 #include <mpi.h>
 #include <stdexcept>
 #include <string.h>
-extern "C" {
 #include "mdi.h"
-}
 
 using namespace std;
 
