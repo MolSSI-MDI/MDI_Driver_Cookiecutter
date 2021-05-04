@@ -9,7 +9,10 @@ import subprocess as sp
 
 
 
-cpp_driver = """#include <string.h>
+cpp_driver = """#include <iostream>
+#include <mpi.h>
+#include <stdexcept>
+#include <string.h>
 #include "mdi.h"
  
 using namespace std;
@@ -117,6 +120,33 @@ cpp_cmake = """# Compile MDI
 add_subdirectory(mdi)
 
 
+# Macro to convert strings to lists
+
+macro(string_to_list _VAR _STR)
+    STRING(REPLACE "  " " " ${_VAR} "${_STR}")
+    STRING(REPLACE " " ";" ${_VAR} "${_STR}")
+endmacro(string_to_list _VAR _STR)
+
+
+# Check for MPI
+
+if ( NOT ( mpi STREQUAL "OFF") )
+   find_package(MPI)
+endif()
+if( NOT MPI_FOUND )
+   if( mpi STREQUAL "ON" )
+      message( WARNING "Could not find MPI.  Compiling without MPI support." )
+   endif()
+   set(mpi "OFF")
+endif()
+
+
+# Add MPI stubs, if needed
+
+if( mpi STREQUAL "OFF" )
+   list(APPEND sources "${CMAKE_CURRENT_SOURCE_DIR}/STUBS_MPI/mpi.h")
+endif()
+
 
 # Locate MPI
 
@@ -138,27 +168,39 @@ include_directories(${MDI_LOCATION})
 
 
 
-# Compile the driver
+# Add the driver as a compile target
 
 add_executable({{ cookiecutter.repo_name }}
                {{ cookiecutter.repo_name }}.cpp)
-target_link_libraries({{ cookiecutter.repo_name }} mdi
-                      ${MPI_LIBRARIES})
 
 
 
-# Ensure that MPI is properly linked
+@ Link to the MDI Library
 
-if(NOT MPI_FOUND)
+target_link_libraries({{ cookiecutter.repo_name }} mdi)
+
+
+# Include and link to MPI
+
+if( mpi STREQUAL "ON" )
+
+   #include MPI
+   string_to_list(MPI_C_COMPILE_OPTIONS   "${MPI_C_COMPILE_FLAGS}")
+   string_to_list(MPI_C_LINK_OPTIONS      "${MPI_C_LINK_FLAGS}")
+
+   target_include_directories({{ cookiecutter.repo_name }} PRIVATE ${MPI_C_INCLUDE_PATH})
+   target_compile_options({{ cookiecutter.repo_name }} PRIVATE ${MPI_C_COMPILE_OPTIONS})
+   target_link_libraries({{ cookiecutter.repo_name }} ${MPI_C_LIBRARIES} ${MPI_C_LINK_OPTIONS})
+
+elseif( mpi STREQUAL "OFF" )
+
+   message( "Compiling without MPI." )
    target_include_directories({{ cookiecutter.repo_name }} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/STUBS_MPI/)
-endif()
-if(MPI_COMPILE_FLAGS)
-   set_target_properties({{ cookiecutter.repo_name }} PROPERTIES
-      COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
-endif()
-if(MPI_LINK_FLAGS)
-   set_target_properties({{ cookiecutter.repo_name }} PROPERTIES
-      LINK_FLAGS "${MPI_LINK_FLAGS}")
+
+else()
+
+   message( FATAL_ERROR "Value of mpi not recognized. Accepted values are: ON; OFF." )
+
 endif()
 """
 
