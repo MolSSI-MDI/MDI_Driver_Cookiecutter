@@ -175,7 +175,7 @@ add_executable({{ cookiecutter.repo_name }}
 
 
 
-@ Link to the MDI Library
+# Link to the MDI Library
 
 target_link_libraries({{ cookiecutter.repo_name }} mdi)
 
