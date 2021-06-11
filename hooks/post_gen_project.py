@@ -65,7 +65,7 @@ import sys
 
 # Import the MDI Library
 try:
-    import mdi.MDI_Library as mdi
+    import mdi
 except:
     raise Exception("Unable to import the MDI Library")
 
