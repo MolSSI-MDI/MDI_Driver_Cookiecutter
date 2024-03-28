@@ -205,7 +205,6 @@ endif()
 """
 
 
-
 py_cmake = """# Compile MDI
 add_subdirectory(mdi)
 
@@ -216,6 +215,33 @@ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/mdi/__init__.py "")
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/{{ cookiecutter.repo_name }}.py ${CMAKE_CURRENT_BINARY_DIR}/{{ cookiecutter.repo_name }}.py COPYONLY)
 """
 
+mdimechanic= """
+code_name: '{{ cookiecutter.repo_name }}'
+docker:
+  image_name: '{{ cookiecutter.repo_name }}'
+
+  build_image:
+    - apt-get update
+    - apt-get install -y cmake
+
+  build_code:
+    - rm -rf {{ cookiecutter.repo_name}}/build
+    - mkdir {{ cookiecutter.repo_name}}/build
+    - cd {{ cookiecutter.repo_name }}/build
+    - cmake ..
+    - make
+    - echo export PATH=$PATH:/{{ cookiecutter.repo_name}}/build >> ~/.bashrc
+
+  validate_engine:
+    - echo "Insert code that will confirm that your code has been built successfully"
+    - exit 1
+
+engine_tests:
+  # Provide at least one example input that can be used to test your code's MDI functionality
+  script:
+    - echo "Insert commands to run an example calculation here"
+    - exit 1
+"""
 
 
 def decode_string(string):
@@ -249,6 +275,16 @@ def write_driver_file():
     else:
         raise Exception("Unsupported language")
 
+def write_mdimechanic_files():
+    # we are using mdimechanic, so write the mdimechanic.yml file
+    # and keep the docker folder
+    if "{{ cookiecutter.use_mdimechanic }}" == "True":
+        with open("mdimechanic.yml","w") as f:
+            f.write(mdimechanic)
+    # we are not using mdimechanic, so remove the docker folder
+    else:
+        # remove docker folder
+        invoke_shell("rm -rf docker")
 
 
 def write_cmake_file():
@@ -270,13 +306,14 @@ def git_init_and_tag():
     # Write the language-specific files
     write_driver_file()
     write_cmake_file()
+    write_mdimechanic_files()
 
     # Initialize git
     invoke_shell("git init")
     # Add files
     invoke_shell("git add .")
     invoke_shell(
-        "git commit -m \"Initial commit after CMS Cookiecutter creation, version {}\"".format(
+        "git commit -m \"Initial commit after MDI Cookiecutter creation, version {}\"".format(
             '{{ cookiecutter._mdi_driver_cc_version }}'))
     # Add MDI as a subtree
     invoke_shell("git subtree add --prefix={{ cookiecutter.repo_name }}/mdi https://github.com/MolSSI/MDI_Library master --squash")
