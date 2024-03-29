@@ -70,6 +70,9 @@ def move_project_files():
     # Move mdimechanic file if required
     if "{{ cookiecutter.use_mdimechanic }}" == "True":
         shutil.move(str(mdimechanic_file), "mdimechanic.yml")
+    else:
+        # remove docker folder if not using mdimechanic
+        shutil.rmtree("docker/")
 
     # Clean up templates directory
     shutil.rmtree(templates_path) 
