@@ -9,6 +9,7 @@ import shutil
 import subprocess as sp
 
 from pathlib import Path
+from distutils.dir_util import copy_tree
 
 
 
@@ -49,6 +50,7 @@ def git_init_and_tag():
     # Set the 0.0.0 tag
     invoke_shell("git tag 0.0.0")
 
+
 def move_project_files():
     language = "{{ cookiecutter.language }}"
     project_path = Path("{{ cookiecutter.repo_name }}")
@@ -60,22 +62,23 @@ def move_project_files():
     elif language == "Python":
         source_path = templates_path / "python"
         mdimechanic_file = templates_path / "mdimechanic_python.yml"
+        # Remove CMakeLists.txt if not using C++
+        os.remove("CMakeLists.txt")
     else:
         raise ValueError(f"Language {language} not recognized. Please choose C++ or Python.")
 
-    # Move language-specific files
-    for item in source_path.glob("*"):
-        shutil.move(str(item), project_path)
+    # Copy language-specific files
+    copy_tree(str(source_path), str(project_path))
 
     # Move mdimechanic file if required
     if "{{ cookiecutter.use_mdimechanic }}" == "True":
         shutil.move(str(mdimechanic_file), "mdimechanic.yml")
     else:
         # remove docker folder if not using mdimechanic
-        shutil.rmtree("docker/")
+        shutil.rmtree("docker")
 
     # Clean up templates directory
-    shutil.rmtree(templates_path) 
+    shutil.rmtree(templates_path)
 
 move_project_files()
 git_init_and_tag()
