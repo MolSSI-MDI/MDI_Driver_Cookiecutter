@@ -12,7 +12,6 @@ docker:
     - cd {{ cookiecutter.repo_name }}/build
     - cmake ..
     - make
-    - echo export PATH=$PATH:/{{ cookiecutter.repo_name}}/build >> ~/.bashrc
 
   validate_engine:
     - echo "Insert code that will confirm that your code has been built successfully"
