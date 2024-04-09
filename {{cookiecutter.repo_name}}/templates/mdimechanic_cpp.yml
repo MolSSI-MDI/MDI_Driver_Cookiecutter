@@ -1,0 +1,24 @@
+code_name: '{{ cookiecutter.repo_name }}'
+docker:
+  image_name: '{{ cookiecutter.repo_name }}'
+
+  build_image:
+    - apt-get update
+    - apt-get install -y cmake
+
+  build_code:
+    - rm -rf {{ cookiecutter.repo_name}}/build
+    - mkdir {{ cookiecutter.repo_name}}/build
+    - cd {{ cookiecutter.repo_name }}/build
+    - cmake ..
+    - make
+
+  validate_engine:
+    - echo "Insert code that will confirm that your code has been built successfully"
+    - exit 1
+
+engine_tests:
+  # Provide at least one example input that can be used to test your code's MDI functionality
+  script:
+    - echo "Insert commands to run an example calculation here"
+    - exit 1
