@@ -1,40 +1,34 @@
 import sys
+import warnings
 
 # Import the MDI Library
-try:
-    import mdi
-except:
-    raise Exception("Unable to import the MDI Library")
+import mdi
 
 # Import MPI Library
 try:
     from mpi4py import MPI
+
     use_mpi4py = True
     mpi_comm_world = MPI.COMM_WORLD
 except ImportError:
     use_mpi4py = False
     mpi_comm_world = None
 
+# Import parser
+from util import create_parser, connect_to_engines
 
 if __name__ == "__main__":
 
-    # Read the command-line options
-    iarg = 1
-    mdi_options = None
-    while iarg < len(sys.argv):
-        arg = sys.argv[iarg]
+    # Read in the command-line options
+    args = create_parser().parse_args()
 
-        if arg == "-mdi":
-            mdi_options = sys.argv[iarg + 1]
-            iarg += 1
-        else:
-            raise Exception("Unrecognized command-line option")
+    mdi_options = args.mdi
 
-        iarg += 1
-
-    # Confirm that the MDI options were provided
     if mdi_options is None:
-        raise Exception("-mdi command-line option was not provided")
+        mdi_options = (
+            "-role DRIVER -name driver -method TCP -port 8021 -hostname localhost"
+        )
+        warnings.warn(f"Warning: -mdi not provided. Using default value: {mdi_options}")
 
     # Initialize the MDI Library
     mdi.MDI_Init(mdi_options)
@@ -42,8 +36,12 @@ if __name__ == "__main__":
     # Get the correct MPI intra-communicator for this code
     mpi_comm_world = mdi.MDI_MPI_get_world_comm()
 
-    # Connect to the engines
+    engines = connect_to_engines({{cookiecutter.number_of_engines}})
 
+    ###########################
     # Perform the simulation
+    ###########################
 
     # Send the "EXIT" command to each of the engines
+    for comm in engines.values():
+        mdi.Send_Command("EXIT", comm)
