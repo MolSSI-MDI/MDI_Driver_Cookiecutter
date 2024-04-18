@@ -2,5 +2,6 @@
     "repo_name": "driver",
     "language": ["C++", "Python"],
     "use_mdimechanic": true,
+    "number_of_engines": 2,
     "_mdi_driver_cc_version": "1.1.0"
 }
