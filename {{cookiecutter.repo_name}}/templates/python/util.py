@@ -3,6 +3,7 @@ Utility functions for the {{cookiecutter.repo_name}} driver.
 """
 
 import argparse
+import mdi
 
 
 def create_parser():
@@ -41,8 +42,8 @@ def connect_to_engines(nengines):
         comm = mdi.MDI_Accept_Communicator()
 
         # Check the name of the engine
-        mdi.Send_Command("<NAME", comm)
-        engine_name = mdi.Recv(mdi.MDI_NAME_LENGTH, mdi.MDI_CHAR, comm)
+        mdi.MDI_Send_Command("<NAME", comm)
+        engine_name = mdi.MDI_Recv(mdi.MDI_NAME_LENGTH, mdi.MDI_CHAR, comm)
 
         engines[engine_name] = comm
 

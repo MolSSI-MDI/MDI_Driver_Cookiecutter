@@ -44,4 +44,4 @@ if __name__ == "__main__":
 
     # Send the "EXIT" command to each of the engines
     for comm in engines.values():
-        mdi.Send_Command("EXIT", comm)
+        mdi.MDI_Send_Command("EXIT", comm)
