@@ -32,12 +32,14 @@ EngineMap connect_to_engines(int nengines) {
 
 }
 
-void initialization(int argc, char **argv, MPI_Comm &mpi_world_comm) {
+void initialization(int *argc, char ***argv, MPI_Comm *mpi_world_comm) {
 
-  MPI_Init(&argc, &argv);
+  std::cout << "argc is " << argc << std::endl;
+
+  MPI_Init(argc, argv);
  
   // Initialize MDI
-  if ( MDI_Init(&argc, &argv) ) {
+  if ( MDI_Init(argc, argv) ) {
     throw std::runtime_error("The MDI library was not initialized correctly.");
   }
  
@@ -51,7 +53,7 @@ void initialization(int argc, char **argv, MPI_Comm &mpi_world_comm) {
   }
  
   // Get the correct MPI intra-communicator for this code
-  if ( MDI_MPI_get_world_comm(&mpi_world_comm) ) {
+  if ( MDI_MPI_get_world_comm(mpi_world_comm) ) {
     throw std::runtime_error("MDI_MPI_get_world_comm failed.");
   }
 }
@@ -60,7 +62,7 @@ int main(int argc, char **argv) {
 
   // Initialize MDI and the MPI environment
   MPI_Comm world_comm;
-  initialization(argc, argv, world_comm);
+  initialization(&argc, &argv, &world_comm);
 
   // Number of engines
   int nengines = {{cookiecutter.number_of_engines}};
